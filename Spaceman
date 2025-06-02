@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaceman Strategist AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Spaceman Strategist AI</h1>
+        <p>Pelajari pola dan uji strategi Anda dalam simulasi game Spaceman.</p>
+
+        <div class="game-area">
+            <div id="multiplier" class="multiplier">1.00x</div>
+            <div id="rocket" class="rocket">🚀</div>
+            <div id="status-message" class="status-message">Siap untuk simulasi!</div>
+        </div>
+
+        <div class="controls">
+            <button id="startButton">Mulai Simulasi</button>
+            <input type="number" id="takeProfitInput" placeholder="Target Take Profit (ex: 2.00)" step="0.01" min="1.01">
+            <button id="manualTakeProfitButton" class="hidden">Take Profit Sekarang</button>
+        </div>
+
+        <div class="statistics">
+            <h2>Statistik Sesi</h2>
+            <p>Total Putaran: <span id="totalRounds">0</span></p>
+            <p>Kemenangan: <span id="wins">0</span></p>
+            <p>Kekalahan: <span id="losses">0</span></p>
+            <p>Rata-rata Crash: <span id="avgCrash">N/A</span></p>
+            <canvas id="crashChart"></canvas>
+        </div>
+
+        <div class="info">
+            <h3>Cara Kerja:</h3>
+            <ul>
+                <li>Klik "Mulai Simulasi" untuk memulai putaran.</li>
+                <li>Roket akan terbang dan pengali akan meningkat.</li>
+                <li>Tentukan target "Take Profit" Anda atau klik "Take Profit Sekarang" secara manual sebelum roket meledak.</li>
+                <li>AI akan menganalisis data crash dari simulasi Anda.</li>
+            </ul>
+            <p>Aplikasi ini adalah alat edukasi dan hiburan. Tidak ada jaminan kemenangan dalam game asli.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container {
+    background-color: #2a0a5e;
+    border-radius: 15px;
+    padding: 30px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    border: 1px solid #4a2a8e;
+}
+
+h1 {
+    color: #9d50f8;
+    margin-bottom: 10px;
+}
+
+p {
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.game-area {
+    background-color: #1a0a3e;
+    border: 2px solid #6a3a9e;
+    border-radius: 10px;
+    padding: 30px 20px;
+    margin-bottom: 25px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.multiplier {
+    font-size: 4em;
+    font-weight: bold;
+    color: #4CAF50; /* Green for active multiplier */
+    text-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+    margin-bottom: 15px;
+    transition: all 0.1s ease-out;
+}
+
+.multiplier.crashed {
+    color: #f44336; /* Red when crashed */
+    text-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
+}
+
+.rocket {
+    font-size: 3em;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: bottom 0.5s ease-out; /* For rocket animation */
+}
+
+.status-message {
+    font-size: 1.1em;
+    color: #bbb;
+    margin-top: 10px;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+button {
+    background-color: #9d50f8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background-color: #8a3fe0;
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+input[type="number"] {
+    background-color: #3a1a6e;
+    border: 1px solid #6a3a9e;
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: #e0e0e0;
+    font-size: 1em;
+    width: 180px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="number"]:focus {
+    border-color: #9d50f8;
+}
+
+.statistics {
+    background-color: #1a0a3e;
+    border: 1px solid #4a2a8e;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.statistics h2 {
+    color: #9d50f8;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.statistics p {
+    margin-bottom: 10px;
+    font-size: 1.05em;
+}
+
+canvas {
+    max-width: 100%;
+    height: 200px; /* Fixed height for chart */
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.info {
+    background-color: #1a0a3e;
+    border: 1px solid #4a2a8e;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.info h3 {
+    color: #9d50f8;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.info ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.info li {
+    margin-bottom: 5px;
+}
+
+.hidden {
+    display: none !important;
+}
